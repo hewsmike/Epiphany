@@ -21,7 +21,7 @@
 
 /*
     Macro name : mov_long_immed_to_reg
-    Purpose : to move a 32-bit immediate vlaue to a general register
+    Purpose : to move a 32-bit immediate value to a general register
 
     Arguments : 'register' - a general register mnemonic
                            - default value = R1
