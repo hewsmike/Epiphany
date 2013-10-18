@@ -20,7 +20,7 @@
 */
 
 /*
-    Macro name : mov_long_immed_to_reg
+    Macro name : mov_long_immed_to_general_reg
     Purpose : to move a 32-bit immediate value to a general register
 
     Arguments : 'register' - a general register mnemonic
@@ -28,39 +28,54 @@
                 'immediate' - a literal to be interpreted as a 32-bit value
                             - default value = 0x00000000
 
-    Registers affected : that specified in the 'register' argument field
-                         or R1 if not.
+    Registers affected : that specified in the 'register' argument field or R1 if not.
 
     Side effects : none.
 */
-.macro  mov_long_immed_to_reg register=R1, immediate=0x00000000
+.macro  mov_long_immed_to_general_reg register=R1, immediate=0x00000000
     mov \register, %low(\immediate);
     movt \register, %high(\immediate);
+.endm
+
+/*
+    Macro name : mov_long_immed_to_special_reg
+    Purpose : to move a 32-bit immediate value to a special register
+
+    Arguments : 'special_register' - a special register mnemonic
+                                   - default value = none ( value required )
+                'immediate' - a literal to be interpreted as a 32-bit value
+                            - default value = 0x00000000
+
+    Registers affected : that specified in the 'special_register' argument field
+                         R1
+
+    Side effects : none.
+*/
+.macro  mov_long_immed_to_special_reg special_register:req, immediate=0x00000000
+    mov_long_immed_to_general_reg R1, \immediate
+    movts \special_register, R1;
 .endm
 
 /*
     Macro name : hardware_loop_prolog
     Purpose : set up a hardware loop
 
-    Arguments : 'loop_start' - unique name for code label
+    Arguments : 'loop_start' - label denoting the beginning of a loop
                              - default value = none ( value required )
-                'loop_end' - unique name for code label
+                'loop_end' - label denoting the finish of a loop
                            - default value = none ( value required )
-                'loop_count' - a literal to be interpreted as a 32-bit value
+                'loop_count' - the number of desired loop iterations
                              - default value = none ( value required )
 
     Registers affected : R1, LS, LE, LC
 
     Side effects : gid
-                 : pad filling with NOP ( 0x01A2 ) to double word align
+                 : pad filling with NOP ( 0x01A2 ) to double word align 
 */
 .macro hardware_loop_prolog loop_start:req, loop_end:req, loop_count:req
-    mov_immed_to_reg R1, \loop_start
-    movts LS, R1;
-    mov_immed_to_reg R1, \loop_end
-    movts LE, R1;
-    mov R1, #\loop_count;
-    movts LC, R1;
+    mov_long_immed_to_special_reg LS, \loop_start
+    mov_long_immed_to_special_reg LE, \loop_end
+    mov_long_immed_to_special_reg LC, #\loop_count
     gid;
     .balignw 8, 0x01A2;
     \loop_start:
@@ -68,7 +83,7 @@
 
 /*
     Macro name : hardware_loop_epilog
-    Purpose : finalise up a hardware loop
+    Purpose : finalise a hardware loop
 
     Arguments : none
 
