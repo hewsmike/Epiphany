@@ -20,7 +20,7 @@
 */
 
 /*
-    Macro name : mov_long_immed_to_general_reg
+    Macro name : longImm2GenReg
     Purpose : to move a 32-bit immediate value to a general register
 
     Arguments : 'register' - a general register mnemonic
@@ -32,13 +32,13 @@
 
     Side effects : none.
 */
-.macro  mov_long_immed_to_general_reg register=R1, immediate=0x00000000
+.macro  longImm2GenReg register=R1, immediate=0x00000000
     mov \register, %low(\immediate);
     movt \register, %high(\immediate);
 .endm
 
 /*
-    Macro name : mov_long_immed_to_special_reg
+    Macro name : longImm2SpecReg
     Purpose : to move a 32-bit immediate value to a special register
 
     Arguments : 'special_register' - a special register mnemonic
@@ -51,13 +51,13 @@
 
     Side effects : none.
 */
-.macro  mov_long_immed_to_special_reg special_register:req, immediate=0x00000000
-    mov_long_immed_to_general_reg R1, \immediate
+.macro  longImm2SpecReg special_register:req, immediate=0x00000000
+    longImm2GenReg R1, \immediate
     movts \special_register, R1;
 .endm
 
 /*
-    Macro name : hardware_loop_prolog
+    Macro name : hardLoopProlog
     Purpose : set up a hardware loop
 
     Arguments : 'loop_start' - label denoting the beginning of a loop
@@ -72,17 +72,17 @@
     Side effects : gid
                  : pad filling with NOP ( 0x01A2 ) to double word align 
 */
-.macro hardware_loop_prolog loop_start:req, loop_end:req, loop_count:req
-    mov_long_immed_to_special_reg LS, \loop_start
-    mov_long_immed_to_special_reg LE, \loop_end
-    mov_long_immed_to_special_reg LC, #\loop_count
+.macro hardLoopProlog loop_start:req, loop_end:req, loop_count:req
+    longImm2SpecReg LS, \loop_start
+    longImm2SpecReg LE, \loop_end
+    longImm2SpecReg LC, #\loop_count
     gid;
     .balignw 8, 0x01A2;
     \loop_start:
 .endm
 
 /*
-    Macro name : hardware_loop_epilog
+    Macro name : hardLoopEpilog
     Purpose : finalise a hardware loop
 
     Arguments : none
@@ -91,6 +91,6 @@
 
     Side effects : gie
 */
-.macro hardware_loop_epilog
+.macro hardLoopEpilog
     gie;
 .endm
